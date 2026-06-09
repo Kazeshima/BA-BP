@@ -1,0 +1,1000 @@
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Palette */
+  --bg-deep:       #06080f;
+  --bg-panel:      #0d1120;
+  --bg-card:       #111827;
+  --bg-card-hover: #16202e;
+  --border:        #1e2d42;
+  --border-bright: #2a3f5a;
+
+  --accent-blue:   #38bdf8;
+  --accent-blue2:  #0ea5e9;
+  --accent-gold:   #f0b429;
+  --accent-red:    #ef4444;
+  --accent-purple: #a855f7;
+  --accent-green:  #22c55e;
+
+  --text-primary:  #e8f0fe;
+  --text-secondary:#8da4be;
+  --text-muted:    #4a6080;
+
+  --attacker-color:#38bdf8;
+  --defender-color:#f97316;
+  --ban-color:     #ef4444;
+  --pick-color:    #a855f7;
+
+  /* Fonts */
+  --font-ui:   'Rajdhani', 'Noto Sans SC', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+
+  /* Sizes */
+  --avatar-grid: 72px;
+  --avatar-slot: 80px;
+  --radius:      6px;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  user-select: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+/* Utility */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+
+/* ─── Layout ────────────────────────────────────────────────── */
+.app-root {
+  display: grid;
+  grid-template-rows: auto minmax(auto, max-content) 1fr auto;
+  height: 100vh;
+  gap: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -10%, #0a1628 0%, transparent 70%),
+    var(--bg-deep);
+}
+
+/* ─── Header ────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+.app-header__logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+}
+.app-header__logo span { color: var(--accent-gold); }
+.app-header__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* ─── Section labels ────────────────────────────────────────── */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+/* ─── Ban Zone (top row) ────────────────────────────────────── */
+.ban-zone {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ban-slots {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ban-slots--left  { justify-content: flex-start; }
+.ban-slots--right { justify-content: flex-end; }
+
+.ban-zone__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+/* ─── Avatar Slot ───────────────────────────────────────────── */
+.avatar-slot {
+  width: var(--avatar-slot);
+  height: var(--avatar-slot);
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--border-bright);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: default;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-slot.drag-over {
+  border-color: var(--accent-blue);
+  background: #0a1e30;
+  box-shadow: 0 0 0 2px var(--accent-blue), 0 0 16px #38bdf840;
+}
+.avatar-slot--ban { border-color: #3a1515; }
+.avatar-slot--ban.filled { border-style: solid; border-color: var(--ban-color); }
+.avatar-slot--pick { border-color: #2a1a3e; }
+.avatar-slot--pick.filled { border-style: solid; border-color: var(--pick-color); }
+.avatar-slot--attacker { --slot-accent: var(--attacker-color); }
+.avatar-slot--defender { --slot-accent: var(--defender-color); }
+
+.avatar-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.avatar-slot__label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, #00000099);
+  font-size: 9px;
+  text-align: center;
+  padding: 2px 2px 3px;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.avatar-slot__remove {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 16px; height: 16px;
+  background: #ef444499;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.avatar-slot:hover .avatar-slot__remove { display: flex; }
+.avatar-slot__empty-icon {
+  color: var(--text-muted);
+  font-size: 22px;
+  opacity: 0.5;
+}
+.avatar-slot__type-tag {
+  position: absolute;
+  top: 2px; left: 2px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.4;
+}
+.avatar-slot__type-tag--M {
+  background: #1a3a5c;
+  color: var(--attacker-color);
+}
+.avatar-slot__type-tag--S {
+  background: #2a1e3a;
+  color: var(--accent-purple);
+}
+
+/* ─── Student Grid (middle) ─────────────────────────────────── */
+.grid-zone {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.grid-zone__filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filter-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 5px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 160px;
+}
+.filter-input:focus { border-color: var(--accent-blue); }
+.filter-input::placeholder { color: var(--text-muted); }
+
+.filter-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.filter-btn.active {
+  background: #0e2236;
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+.filter-btn.active-defender {
+  background: #261608;
+  border-color: var(--defender-color);
+  color: var(--defender-color);
+}
+
+.student-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-content: flex-start;  /* pack rows tight, no stretching gaps */
+}
+
+/* ─── Student Card ──────────────────────────────────────────── */
+.student-card {
+  width: var(--avatar-grid);
+  height: var(--avatar-grid);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  transition: transform 0.15s, border-color 0.15s, filter 0.2s;
+  flex-shrink: 0;
+}
+.student-card:hover:not(.is-banned):not(.is-picked) {
+  transform: translateY(-2px) scale(1.05);
+  border-color: var(--accent-blue);
+  z-index: 2;
+}
+.student-card:active { cursor: grabbing; transform: scale(0.95); }
+.student-card.is-banned {
+  filter: grayscale(1) brightness(0.5);
+  cursor: not-allowed;
+  border-color: #2a1515;
+}
+/* In release mode the app root gets data-release="true" */
+[data-release="true"] .student-card.is-banned {
+  cursor: grab;
+}
+[data-release="true"] .student-card.is-banned:active {
+  cursor: grabbing;
+}
+.student-card.is-picked {
+  border-color: var(--pick-color);
+  box-shadow: 0 0 0 1px #a855f740, inset 0 0 0 9999px #a855f720;
+}
+.student-card.is-picked::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: #a855f725;
+  pointer-events: none;
+}
+.student-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+.student-card__name {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, #000000bb);
+  font-size: 9px;
+  padding: 4px 3px 2px;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #eee;
+  pointer-events: none;
+}
+.student-card__supporter-badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  font-size: 8px;
+  font-weight: 700;
+  background: #2a1e3a;
+  color: var(--accent-purple);
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.student-card__img-loading {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── Bottom / Pick Zone ────────────────────────────────────── */
+.pick-zone {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto 1fr;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  align-items: center;
+  min-width: 0;
+}
+
+.team-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.team-panel__player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.player-avatar-drop {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px dashed var(--border-bright);
+  background: var(--bg-card);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.player-avatar-drop:hover { border-color: var(--accent-blue); }
+.player-avatar-drop img { width: 100%; height: 100%; object-fit: cover; }
+.player-avatar-drop input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+}
+.player-avatar-drop__icon { font-size: 20px; color: var(--text-muted); }
+
+.player-name-input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+.player-name-input:focus { border-color: var(--accent-blue); }
+
+.team-slots {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+.team-slots--main { }
+.team-slots--support { margin-left: 8px; }
+.team-slots-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.team-slots-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+/* ─── Center panel (timer + swap) ───────────────────────────── */
+.center-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
+}
+.timer-display {
+  font-family: var(--font-mono);
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--accent-blue);
+  line-height: 1;
+  text-shadow: 0 0 20px #38bdf860;
+  transition: color 0.3s;
+}
+.timer-display.danger { color: var(--accent-red); text-shadow: 0 0 20px #ef444460; }
+.timer-display.warning { color: var(--accent-gold); text-shadow: 0 0 20px #f0b42960; }
+
+.timer-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.timer-input {
+  width: 54px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 4px 6px;
+  text-align: center;
+  outline: none;
+}
+.timer-input:focus { border-color: var(--accent-blue); }
+
+.btn {
+  border-radius: var(--radius);
+  border: 1px solid;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-primary {
+  background: var(--accent-blue2);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent-blue); box-shadow: 0 0 12px #38bdf850; }
+.btn-danger {
+  background: #3a0e0e;
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.btn-danger:hover { background: var(--accent-red); color: #fff; }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-bright);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+.btn-swap {
+  background: #1a1a0a;
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  font-size: 18px;
+  padding: 6px 12px;
+}
+.btn-swap:hover { background: var(--accent-gold); color: #000; box-shadow: 0 0 12px #f0b42950; }
+
+/* ─── Section headers ───────────────────────────────────────── */
+.side-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.side-header--attacker { color: var(--attacker-color); }
+.side-header--defender { color: var(--defender-color); }
+.side-header__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.side-header--attacker .side-header__dot { background: var(--attacker-color); }
+.side-header--defender .side-header__dot { background: var(--defender-color); }
+
+/* ─── Loading ────────────────────────────────────────────────── */
+.loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg-deep);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 100;
+}
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border-bright);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+}
+
+/* ─── Reset confirm ──────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: #00000099;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  padding: 28px 32px;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 60px #00000080;
+}
+.modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+.modal p  { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+.modal__actions { display: flex; gap: 10px; justify-content: center; }
+
+/* ─── Drag ghost ──────────────────────────────────────────────── */
+.drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.85;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 32px #00000080;
+  border: 2px solid var(--accent-blue);
+}
+.drag-ghost img {
+  width: 60px; height: 60px;
+  display: block;
+  object-fit: cover;
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────────── */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+.tooltip-wrapper:hover .tooltip-box { display: block; }
+.tooltip-box {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827ee;
+  border: 1px solid var(--border-bright);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ─── Misc ───────────────────────────────────────────────────── */
+.no-students {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+/* ─── Language selector ──────────────────────────────────────── */
+.lang-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.lang-select:hover,
+.lang-select:focus { border-color: var(--accent-blue); }
+.lang-select option { background: var(--bg-card); color: var(--text-primary); }
+
+/* ─── Archive panel ──────────────────────────────────────────── */
+.archive-panel {
+  position: fixed;
+  top: 0; right: 0;
+  height: 100vh;
+  width: 320px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border-bright);
+  z-index: 90;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: row;
+  box-shadow: -8px 0 32px #00000060;
+}
+
+.archive-tab {
+  position: absolute;
+  left: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  padding: 14px 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-bright);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  color: var(--accent-gold);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -4px 0 12px #00000040;
+  transition: background 0.15s;
+}
+.archive-tab:hover { background: var(--bg-card-hover); }
+
+.archive-panel__inner {
+  flex: 1;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+.archive-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Archived card style */
+.student-card.is-archived {
+  filter: sepia(0.6) brightness(0.7);
+  border-color: var(--accent-gold);
+  cursor: grab;
+}
+.student-card.is-archived:hover {
+  filter: sepia(0.2) brightness(0.9);
+  border-color: var(--accent-gold);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* ─── Context menu ───────────────────────────────────────────── */
+.ctx-menu {
+  position: fixed;
+  z-index: 9000;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px #00000080;
+  min-width: 140px;
+  overflow: hidden;
+}
+.ctx-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ctx-menu__item:hover { background: var(--bg-card-hover); }
+.ctx-menu__item--cancel { color: var(--text-muted); font-size: 12px; }
+
+/* ─── Score box ──────────────────────────────────────────────── */
+.score-box-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-box {
+  width: 62px;
+  height: 62px;
+  background: var(--bg-card);
+  border: 2px solid;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 38px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: font-size 0.15s, box-shadow 0.2s;
+  padding: 0;
+  /* hide number input arrows */
+  -moz-appearance: textfield;
+}
+.score-box::-webkit-inner-spin-button,
+.score-box::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.score-box:focus {
+  box-shadow: 0 0 0 2px currentColor, 0 0 16px currentColor;
+}
+
+/* ─── Release mode unlock icon overlay ──────────────────────── */
+.student-card__release-icon {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 11px;
+  line-height: 1;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px #000);
+}
+/* In release mode, banned cards are draggable again */
+.student-card.is-banned {
+  /* keep greyscale for audience clarity — cursor change signals draggability */
+}
+
+/* ─── Generic mode toggle button ────────────────────────────── */
+.filter-btn.active-generic {
+  background: #0e1e12;
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── slot-draggable cursor ─────────────────────────────────── */
+.slot-draggable { cursor: grab; }
+.slot-draggable:active { cursor: grabbing; }
+
+/* ─── Protected slots panel ─────────────────────────────────── */
+.protected-panel {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.protected-panel__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent-green);
+  white-space: nowrap;
+}
+.protected-panel__slots {
+  display: flex;
+  gap: 5px;
+}
+.protected-slot {
+  border-color: var(--accent-green) !important;
+  position: relative;
+}
+.protected-badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  font-size: 9px;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px #000);
+}
+
+/* ─── Free student floating panel ───────────────────────────── */
+.free-panel {
+  position: fixed;
+  z-index: 500;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-gold);
+  border-radius: 8px;
+  min-width: 160px;
+  max-width: 240px;
+  box-shadow: 0 8px 32px #00000080;
+  padding: 0;
+  overflow: hidden;
+}
+.free-panel__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #1a1404;
+  border-bottom: 1px solid var(--accent-gold);
+  cursor: move;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 0.08em;
+  user-select: none;
+}
+.free-panel__collapse {
+  background: transparent;
+  border: none;
+  color: var(--accent-gold);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+}
+.free-panel__hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 10px 2px;
+}
+.free-panel__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.free-card {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--accent-gold);
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+.free-card:active { cursor: grabbing; }
+.free-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+.free-card__name {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, #00000099);
+  font-size: 8px;
+  padding: 2px 2px 2px;
+  text-align: center;
+  color: #eee;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ─── Protected badge on student card in grid ─────────────────── */
+.student-card__protected-badge {
+  position: absolute;
+  bottom: 14px; right: 2px;
+  font-size: 9px;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px #000);
+}
+.student-card.is-protected {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 1px #22c55e30;
+}
+
+/* ─── Free panel section label ───────────────────────────────── */
+.free-panel__section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* ─── Free panel search dropdown ─────────────────────────────── */
+.free-panel__dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0; right: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  z-index: 99999;
+  box-shadow: 0 8px 24px #00000090;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.free-panel__suggestion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.free-panel__suggestion:hover { background: var(--bg-card-hover); }
+
+/* ─── Type icons on student cards / slots ────────────────────── */
+/* When type icons are present, nudge the M/S type-tag to the right */
+.avatar-slot .avatar-slot__type-tag {
+  left: 30px;  /* leave room for the 2×icon stack (~2+13+1+13 = ~29px) */
+}
+/* On very small slots where icons would be tiny, keep tag at left */
+/* (handled by JS not rendering icons when side==="shared") */

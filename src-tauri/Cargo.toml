@@ -1,0 +1,24 @@
+[package]
+name = "ba-draft-tool"
+version = "1.0.0"
+description = "Blue Archive Draft Tool"
+authors = ["you"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[package.metadata.bundle]
+name = "BA Draft Tool"
+identifier = "com.badraft.tool"
+
+[lib]
+name = "ba_draft_tool_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
