@@ -1,0 +1,608 @@
+@import "tailwindcss";
+@import "@fontsource/rajdhani/latin-500.css";
+@import "@fontsource/rajdhani/latin-600.css";
+@import "@fontsource/rajdhani/latin-700.css";
+@import "@fontsource/share-tech-mono/latin-400.css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ─── Theme tokens ───────────────────────────────────────────────
+   Light = "Schale" (the in-game blue/white UI). Dark = night broadcast. */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #e9f1fa;
+  --bg-accent: #d7e8fb;
+  --surface: #ffffff;
+  --surface-2: #f3f7fc;
+  --surface-3: #e6eef8;
+  --line: #d3e0ef;
+  --line-strong: #b5c9e0;
+  --fg: #172540;
+  --muted: #5b6f8c;
+  --subtle: #8fa2bd;
+  --brand: #128cff;
+  --brand-strong: #0a6fd1;
+  --brand-fg: #ffffff;
+  --brand-soft: #e1f0ff;
+  --gold: #f5b70a;
+  --atk: #1e88e5;
+  --atk-soft: #dcecfd;
+  --def: #f2621f;
+  --def-soft: #fde6da;
+  --ban: #e5484d;
+  --ban-soft: #fde3e4;
+  --ok: #18a058;
+  --shadow: 0 1px 2px rgb(23 37 64 / 0.06), 0 4px 16px rgb(23 37 64 / 0.06);
+  --shadow-lg: 0 12px 40px rgb(23 37 64 / 0.18);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #070b14;
+  --bg-accent: #0c1a33;
+  --surface: #0e1527;
+  --surface-2: #121b31;
+  --surface-3: #18233d;
+  --line: #1f2c47;
+  --line-strong: #2d3e60;
+  --fg: #e6eefc;
+  --muted: #8a9bbb;
+  --subtle: #56688b;
+  --brand: #38bdf8;
+  --brand-strong: #7dd3fc;
+  --brand-fg: #04121f;
+  --brand-soft: #0d2a40;
+  --gold: #f6c33b;
+  --atk: #38bdf8;
+  --atk-soft: #0b2a3f;
+  --def: #fb8a4c;
+  --def-soft: #3a1d10;
+  --ban: #f05257;
+  --ban-soft: #3a1418;
+  --ok: #34d399;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px rgb(0 0 0 / 0.25);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-gold: var(--gold);
+  --color-atk: var(--atk);
+  --color-atk-soft: var(--atk-soft);
+  --color-def: var(--def);
+  --color-def-soft: var(--def-soft);
+  --color-ban: var(--ban);
+  --color-ban-soft: var(--ban-soft);
+  --color-ok: var(--ok);
+  --font-sans:
+    "Rajdhani", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC",
+    system-ui, sans-serif;
+  --font-mono: "Share Tech Mono", ui-monospace, "Cascadia Mono", monospace;
+  --shadow-panel: var(--shadow);
+  --shadow-float: var(--shadow-lg);
+}
+
+/* ─── Base ─────────────────────────────────────────────────────── */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(60rem 24rem at 50% -8rem, var(--bg-accent), transparent 70%),
+      linear-gradient(transparent 0 calc(100% - 1px), color-mix(in srgb, var(--line) 45%, transparent) 0),
+      linear-gradient(
+        90deg,
+        transparent 0 calc(100% - 1px),
+        color-mix(in srgb, var(--line) 45%, transparent) 0
+      );
+    background-size:
+      100% 100%,
+      32px 32px,
+      32px 32px;
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  input,
+  textarea,
+  select {
+    user-select: text;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 30%, transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--brand);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ─── Components ───────────────────────────────────────────────── */
+@layer components {
+  .panel {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(8px);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: var(--eyebrow-color, var(--brand));
+    clip-path: polygon(35% 0, 100% 0, 65% 100%, 0 100%);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s,
+      transform 0.1s,
+      box-shadow 0.15s;
+  }
+  .btn:hover:not(:disabled) {
+    border-color: var(--line-strong);
+    background: var(--surface-2);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .btn-icon {
+    width: 32px;
+    padding: 0;
+  }
+  .btn-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-fg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--brand-strong);
+    border-color: var(--brand-strong);
+  }
+  .btn-danger {
+    color: var(--ban);
+    border-color: color-mix(in srgb, var(--ban) 35%, var(--line));
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--ban-soft);
+    border-color: var(--ban);
+  }
+  .btn-danger-solid {
+    background: var(--ban);
+    border-color: var(--ban);
+    color: #fff;
+  }
+  .btn-danger-solid:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ban) 85%, black);
+  }
+  .btn[data-active="true"] {
+    background: var(--brand-soft);
+    border-color: var(--brand);
+    color: var(--brand-strong);
+  }
+  .btn-release[data-active="true"] {
+    background: color-mix(in srgb, #8b5cf6 18%, var(--surface));
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #8b5cf6 20%, transparent);
+  }
+  /* Slanted call-to-action, echoing the in-game buttons. */
+  .btn-slant {
+    border-radius: 4px;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    padding: 0 20px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--line-strong);
+  }
+  .chip[data-active="true"] {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-fg);
+  }
+
+  .input {
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--fg);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .input::placeholder {
+    color: var(--subtle);
+    font-weight: 500;
+  }
+  .input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
+  }
+
+  .select {
+    appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a9bbb' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+  }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid var(--line-strong);
+    border-bottom-width: 2px;
+    background: var(--surface-2);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg);
+  }
+
+  /* ─── Student card (roster) ─── */
+  .card {
+    position: relative;
+    width: var(--card-size, 76px);
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-3);
+    border: 2px solid transparent;
+    box-shadow: var(--shadow);
+    cursor: grab;
+    touch-action: none;
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease,
+      border-color 0.12s,
+      opacity 0.2s,
+      filter 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--brand);
+  }
+  .card[data-dragging="true"] {
+    opacity: 0.35;
+  }
+  .card[data-banned="true"] {
+    filter: grayscale(1);
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .card[data-banned="true"]:hover {
+    transform: none;
+    border-color: var(--ban);
+  }
+  .card[data-picked="attacker"] {
+    border-color: var(--atk);
+  }
+  .card[data-picked="defender"] {
+    border-color: var(--def);
+  }
+  .card[data-picked]:not([data-picked=""]) img {
+    filter: saturate(0.55) brightness(0.85);
+  }
+
+  .portrait {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 15%;
+    pointer-events: none;
+  }
+  .portrait-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .nameplate {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 10px 4px 2px;
+    background: linear-gradient(transparent, rgb(6 12 26 / 0.85));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+    pointer-events: none;
+  }
+
+  /* ─── Slots (bans, picks, protected) ─── */
+  .slot {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px dashed var(--slot-color, var(--line-strong));
+    background: color-mix(in srgb, var(--slot-color, var(--line)) 8%, var(--surface-2));
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    transition:
+      border-color 0.12s,
+      background-color 0.12s,
+      box-shadow 0.12s,
+      transform 0.12s;
+    touch-action: none;
+  }
+  .slot[data-filled="true"] {
+    border-style: solid;
+    background: var(--surface-3);
+    cursor: grab;
+  }
+  .slot[data-accept="yes"] {
+    border-color: var(--ok);
+    border-style: solid;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent);
+  }
+  .slot[data-accept="yes"][data-over="true"] {
+    transform: scale(1.06);
+    background: color-mix(in srgb, var(--ok) 18%, var(--surface-2));
+  }
+  .slot[data-accept="no"] {
+    opacity: 0.5;
+  }
+  .slot[data-accept="no"][data-over="true"] {
+    opacity: 1;
+    border-color: var(--ban);
+    border-style: solid;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ban) 30%, transparent);
+  }
+  .slot[data-invalid="true"] {
+    box-shadow:
+      0 0 0 2px var(--ban),
+      0 0 12px color-mix(in srgb, var(--ban) 60%, transparent);
+  }
+  .slot[data-dragging="true"] > img {
+    opacity: 0.3;
+  }
+  .slot-ban[data-filled="true"] img {
+    filter: grayscale(0.85) brightness(0.8);
+  }
+  .slot-ban[data-filled="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top right,
+      transparent calc(50% - 1.5px),
+      color-mix(in srgb, var(--ban) 90%, transparent) calc(50% - 1.5px) calc(50% + 1.5px),
+      transparent calc(50% + 1.5px)
+    );
+    pointer-events: none;
+  }
+  .slot-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    z-index: 5;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: rgb(10 16 30 / 0.75);
+    color: #fff;
+    opacity: 0;
+    transition:
+      opacity 0.12s,
+      background-color 0.12s;
+    cursor: pointer;
+  }
+  .slot:hover .slot-remove,
+  .slot-remove:focus-visible {
+    opacity: 1;
+  }
+  .slot-remove:hover {
+    background: var(--ban);
+  }
+
+  .type-tag {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    padding: 0 4px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 15px;
+    color: #fff;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .drag-overlay {
+    width: 84px;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--brand);
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-4deg) scale(1.05);
+    cursor: grabbing;
+    position: relative;
+    background: var(--surface-3);
+  }
+
+  .ctx-menu {
+    position: fixed;
+    z-index: 1000;
+    min-width: 180px;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+  }
+  .ctx-menu button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    text-align: left;
+    cursor: pointer;
+  }
+  .ctx-menu button:hover {
+    background: var(--brand-soft);
+  }
+  .ctx-menu svg {
+    width: 15px;
+    height: 15px;
+    color: var(--muted);
+  }
+}
+
+@keyframes pulse-danger {
+  50% {
+    opacity: 0.55;
+  }
+}
+.animate-pulse-danger {
+  animation: pulse-danger 1s steps(2, jump-none) infinite;
+}
+
+/* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must win over component transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must win over component transitions */

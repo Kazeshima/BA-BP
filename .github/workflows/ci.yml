@@ -1,0 +1,75 @@
+# Fast checks for every PR and push to main.
+# Free on public repos; no artifacts are uploaded, only the dependency caches are used.
+name: CI
+
+on:
+  pull_request:
+    paths-ignore: ["**/*.md", "docs/**", "LICENSE"]
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md", "docs/**", "LICENSE"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build
+
+  changes:
+    name: Detect desktop changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      tauri: ${{ steps.filter.outputs.tauri }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            tauri:
+              - "src-tauri/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+
+  # Only compiles the Rust shell when it (or the Tauri packages) changed.
+  tauri:
+    name: Check desktop shell
+    needs: changes
+    if: needs.changes.outputs.tauri == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          # PR runs reuse main's cache but don't write their own, keeping the cache small.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Stub frontend dist (not needed for a compile check)
+        shell: bash
+        run: mkdir -p dist && echo '<!doctype html>' > dist/index.html
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy --locked --all-targets -- -D warnings

@@ -1,0 +1,21 @@
+# Monthly, grouped dependency updates: at most one PR per ecosystem.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      # The Tauri CLI requires npm and Rust Tauri packages on the same minor version,
+      # so Tauri is left for manual, coordinated upgrades (see docs/development.md).
+      npm:
+        patterns: ["*"]
+        exclude-patterns: ["@tauri-apps/*"]
+    ignore:
+      - dependency-name: "@tauri-apps/*"
+        update-types: ["version-update:semver-minor"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ["*"]
