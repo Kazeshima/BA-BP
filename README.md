@@ -1,176 +1,80 @@
-# Blue Archive — Draft Tool
+<div align="center">
 
-A lightweight desktop app for hosting **ban-pick drafts** in unofficial Blue Archive PvP competitions. Built with **React + Vite + Tauri** — ships as a single Windows `.exe` with no runtime dependencies.
+# BA Draft Tool
 
----
+**English** · [简体中文](README.zh-CN.md)
 
-## ✨ Features
+A ban/pick drafting board for unofficial **Blue Archive** PvP tournaments.<br>
+Built for hosts and casters: drag students into bans and teams, the rules are enforced for you.
 
-| Feature | Details |
+[![CI](https://github.com/Kazeshima/BA-BP/actions/workflows/ci.yml/badge.svg)](https://github.com/Kazeshima/BA-BP/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Kazeshima/BA-BP?label=download)](https://github.com/Kazeshima/BA-BP/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+[**Download for Windows**](https://github.com/Kazeshima/BA-BP/releases/latest) · [**Open in browser**](https://kazeshima.github.io/BA-BP/) · [User guide](docs/user-guide.md)
+
+<img src="docs/images/screenshot-light-zh.webp" alt="Light theme (Chinese UI)" width="49%"> <img src="docs/images/screenshot-dark-en.webp" alt="Dark theme (English UI)" width="49%">
+
+</div>
+
+## Features
+
+- **Full roster from [SchaleDB](https://schaledb.com)**, with names in 简中 / 国服 / 繁中 / 日本語 / 한국어 / English, filtered to what's released on the JP, Global or CN server. Cached for offline use.
+- **Drag-and-drop drafting**: per-side bans, up to 80 shared bans, and teams in **4 Striker + 2 Special** or **6 generic** slots.
+- **Rules enforced as you drag**: slots light up green or red before you drop. You can't pick banned students, pick a student twice, or put a Striker in a Special slot. Illegal drops explain why.
+- **Special rules mode** lifts the restrictions for exhibition games. It can only be turned off once the board is legal again, and any slot that breaks the rules is highlighted.
+- **Free students** (can be picked repeatedly and ignore bans) and **protected students** (can never be banned).
+- **Undo / redo** for every board change (`Ctrl+Z` / `Ctrl+Shift+Z`).
+- **Scoreboard and pick timer**: pause and resume, a progress bar, and optional countdown beeps (`Space` to start or pause).
+- **Next round** keeps shared bans and scores. **Reset all** starts over.
+- **Archive** hides students you never want in the pool.
+- **Bilingual UI** (中文 / English), **light and dark themes**, and fullscreen mode (`F11`) for streaming.
+- **Everything persists**: the board, player names, avatars and settings survive a restart. Settings from v1.x are migrated automatically.
+- **Lightweight desktop app** (Tauri + WebView2, a few MB) with a portable `.exe`, and the same app on the web.
+
+## Download
+
+| | |
 |---|---|
-| **Student roster** | Fetches the full student list from SchaleDB (Chinese names) on launch |
-| **Ban zone** | 5 ban slots per side (attacker / defender) — drag & drop from the grid |
-| **Pick zone** | 4 main + 2 support slots per side — enforces squad type (Main / Support only in correct slots) |
-| **Visual feedback** | Banned students turn greyscale · Picked students turn purple in the grid |
-| **Countdown timer** | Host sets duration (seconds), clicks Start — auto-counts down, resets on each round |
-| **Player identity** | Name text boxes + drag-and-drop local image for player avatars |
-| **Swap button** | Instantly swap attacker/defender names and avatars |
-| **Filters** | Search by name, filter by Main/Support squad type and role |
-| **Reset** | One-click full reset with confirmation modal |
-| **Single EXE** | Tauri bundles everything into a ~5 MB installer — no Node/Rust needed to run |
+| **Windows installer** | `BA-Draft-Tool_<version>_x64-setup.exe` from [Releases](https://github.com/Kazeshima/BA-BP/releases/latest) |
+| **Windows portable** | `BA-Draft-Tool_<version>_x64-portable.exe`, no install needed |
+| **Web** | <https://kazeshima.github.io/BA-BP/>, works in any modern browser |
 
----
+The desktop app needs [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/), which ships with Windows 10 and 11. It checks GitHub for new versions once a day and shows a notice when one is available.
 
-## 🖥 Screenshot layout
+## Quick start
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ Header: BA Draft Tool                          [↺ 重置]         │
-├─────────────────────────────────────────────────────────────────┤
-│ [ATK BAN ×5]              禁用区              [DEF BAN ×5]      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   Student avatar grid (scrollable, filterable)                  │
-│   grey = banned  ·  purple = picked                             │
-│                                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│ [Player A] [M×4|S×2]    ⏱ 00:60  [⇄]   [M×4|S×2] [Player B]  │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. Launch the app. The student list loads from SchaleDB.
+2. **Ban**: drag a student from the roster into a red ban slot (or a gold shared-ban slot).
+3. **Pick**: drag students into each team's slots. Use the `4+2` / `6 any` toggle to switch layouts.
+4. **Fix mistakes**: drag a student back onto the roster, right-click the slot, or press `Ctrl+Z`.
+5. **Between games**: use **Next round**, update the score, and **⇄** to swap sides.
 
----
+See the [user guide](docs/user-guide.md) for every rule and shortcut.
 
-## 🚀 Getting started (development)
+## Development
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18 or later
-- [Rust](https://rustup.rs/) (stable toolchain)
-- Windows: [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) or Visual Studio with C++ workload
-- [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) — already included on Windows 10/11
-
-### Install
+Requires Node.js 22+ and pnpm. The desktop build also needs Rust and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ba-draft-tool.git
-cd ba-draft-tool
-npm install
+pnpm install
+pnpm dev            # web app at http://localhost:1420
+pnpm tauri dev      # desktop app with hot reload
+pnpm check          # lint + typecheck + tests + version check
+pnpm tauri build    # Windows installer
 ```
 
-### Run in development
+**Releasing** is automatic. Bump the version and push to `main`:
 
 ```bash
-npm run tauri dev
+pnpm version:bump patch     # or minor / major / 2.1.0-beta.1
+git commit -am "chore: release v2.0.1" && git push
 ```
 
-### Build for Windows (produces installer EXE + MSI)
+CI builds the installer and portable exe, publishes a GitHub Release with notes, and deploys the web version. The pipeline runs on free GitHub-hosted runners and never uploads workflow artifacts. See [docs/development.md](docs/development.md) for the architecture and the CI/CD design.
 
-```bash
-npm run tauri build
-```
+## Credits
 
-Output is in `src-tauri/target/release/bundle/`.
+Student data and images: [SchaleDB](https://schaledb.com). *Blue Archive* is a trademark of NEXON Games / Yostar. This is an unofficial fan project, not affiliated with them.
 
-> **First time?** Generate icons before building:
-> ```bash
-> # Place a 512×512 PNG as app-icon.png in the project root, then:
-> npm run tauri icon app-icon.png
-> ```
-> Or copy placeholder icons from the [Tauri examples repo](https://github.com/tauri-apps/tauri/tree/dev/examples/api/src-tauri/icons) into `src-tauri/icons/`.
-
----
-
-## 📦 Release via GitHub Actions
-
-Push a tag to trigger an automated Windows build:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The workflow (`.github/workflows/build.yml`) will build and attach the installer to a GitHub Release draft.
-
----
-
-## 🎮 How to use (host guide)
-
-1. Launch the app — students load automatically from SchaleDB.
-2. **Ban phase**: Drag a student card from the grid onto one of the ban slots (top row). The student turns greyscale in the grid.
-3. **Pick phase**: Drag a student card from the grid onto one of the team slots (bottom row).
-   - Main students (1XXXX IDs) → the 4 main slots only
-   - Supporter students (2XXXX IDs) → the 2 support slots only
-4. **Timer**: Enter seconds in the input box. Click **▶ 开始** to start countdown. Click again to pause. Click **↺** to reset.
-5. **Player info**: Type player names in the text boxes. Click/drag a local image onto the circular avatar to set a profile picture. Use **⇄** to swap sides.
-6. **Reset**: Click the **↺ 重置** button in the header to clear everything.
-
----
-
-## 🗂 Project structure
-
-```
-ba-draft-tool/
-├── src/
-│   ├── components/
-│   │   ├── AvatarSlot.jsx      # Droppable slot (ban or pick)
-│   │   ├── BanZone.jsx         # Top ban row
-│   │   ├── PlayerPanel.jsx     # Bottom team panel (one side)
-│   │   ├── PickZone.jsx        # Bottom row layout
-│   │   ├── ResetModal.jsx      # Confirmation dialog
-│   │   ├── StudentCard.jsx     # Draggable card in grid
-│   │   ├── StudentGrid.jsx     # Scrollable student roster
-│   │   └── Timer.jsx           # Countdown timer
-│   ├── hooks/
-│   │   └── useDragContext.jsx  # Custom drag & drop context
-│   ├── store/
-│   │   └── draftStore.js       # Zustand global state
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
-├── src-tauri/
-│   ├── src/main.rs
-│   ├── Cargo.toml
-│   ├── build.rs
-│   ├── tauri.conf.json
-│   └── icons/
-├── .github/workflows/build.yml
-├── index.html
-├── package.json
-└── vite.config.js
-```
-
----
-
-## 🔧 Configuration
-
-### Change number of ban slots
-
-In `src/store/draftStore.js`, edit:
-```js
-const MAX_BAN_SLOTS = 5; // change to desired count
-```
-And update `BanZone.jsx` slot rendering accordingly.
-
-### Switch to English student names
-
-In `App.jsx`, change the fetch URL:
-```js
-const STUDENTS_URL = "https://schaledb.com/data/en/students.json";
-```
-
-### Offline mode
-
-To use without internet, pre-download the JSON and bundle it:
-1. Save `students.json` into `src/assets/students.json`
-2. In `App.jsx`, replace the `fetch()` with:
-   ```js
-   import rawStudents from "./assets/students.json";
-   // then call setStudents(parseStudents(rawStudents)) directly
-   ```
-Student images will still need network access (or you can download and serve them locally).
-
----
-
-## 📄 License
-
-MIT — do whatever you want with it.
+Licensed under the [MIT License](LICENSE).

@@ -1,0 +1,165 @@
+# Publishes a release whenever the version in package.json changes on main.
+#
+#   pnpm version:bump patch   # or minor / major / 2.1.0-beta.1
+#   git commit -am "chore: release v2.0.1" && git push
+#
+# Flow: prepare (is this version new?) → verify + build-windows in parallel → publish.
+# The Windows build uploads straight into a *draft* GitHub Release (release assets don't
+# count against Actions storage), so no workflow artifacts are ever stored. The draft is
+# only published once the checks pass; otherwise it is deleted.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Detect version
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      release: ${{ steps.meta.outputs.release }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: meta
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag already exists, nothing to release."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Releasing $tag"
+          fi
+          if [[ "$version" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify:
+    name: Verify
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+
+  build-windows:
+    name: Build Windows
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          shared-key: release
+      - run: pnpm install --frozen-lockfile
+      - name: Build installer
+        run: pnpm tauri build --bundles nsis --ci
+
+      - name: Collect release files
+        shell: bash
+        run: |
+          mkdir -p release
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe "release/BA-Draft-Tool_${VERSION}_x64-setup.exe"
+          cp src-tauri/target/release/ba-draft-tool.exe "release/BA-Draft-Tool_${VERSION}_x64-portable.exe"
+          (cd release && sha256sum *.exe > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          node scripts/release-notes.mjs "$VERSION" > notes.md
+
+      - name: Upload to draft release
+        shell: bash
+        run: |
+          # Drop a leftover draft from an earlier failed run of the same version.
+          if gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null | grep -q true; then
+            gh release delete "$TAG" --yes
+          fi
+          gh release create "$TAG" release/* \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "BA Draft Tool $TAG" \
+            --notes-file notes.md \
+            --generate-notes \
+            ${{ needs.prepare.outputs.prerelease == 'true' && '--prerelease' || '' }}
+
+  publish:
+    name: Publish
+    needs: [prepare, verify, build-windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Publish release
+        run: |
+          gh release edit "$TAG" --draft=false \
+            ${{ needs.prepare.outputs.prerelease == 'true' && '--prerelease' || '--latest' }}
+
+      # Web build → gh-pages branch (a git push, not an Actions artifact).
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile && pnpm build
+      - name: Deploy web version to gh-pages
+        if: needs.prepare.outputs.prerelease != 'true'
+        working-directory: dist
+        run: |
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Deploy ${TAG}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+  discard:
+    name: Discard draft on failure
+    needs: [prepare, verify, build-windows]
+    if: failure() && needs.build-windows.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: gh release delete "${{ needs.prepare.outputs.tag }}" --yes -R "$GITHUB_REPOSITORY"
